@@ -15,5 +15,8 @@ if [ -n "${PORT}" ]; then
   export CADDY_LE_EMAIL=""
 fi
 
+# Ensure upstream entrypoint is executable (permission safeguard)
+chmod +x /entrypoint.sh 2>/dev/null || true
+
 # Run original entrypoint (preserves .env loading, APP_KEY generation, etc.)
 exec /entrypoint.sh "$@"
