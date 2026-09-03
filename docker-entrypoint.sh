@@ -2,6 +2,16 @@
 # shellcheck shell=dash
 # Modified for Railway — listens on $PORT instead of :80
 
+# Wait for Railway volume to be mounted on /pelican-data
+# The entrypoint runs BEFORE the bind-mount completes, so we must wait
+# otherwise our .env writes get hidden by the mount.
+for i in $(seq 1 30); do
+  if mount | grep -q "/pelican-data"; then
+    break
+  fi
+  sleep 1
+done
+
 # Force-rebuild .env from Railway-injected env vars on every boot.
 # Pelican's installer reads .env directly; stale values on volume cause
 # the installer to prompt for connection info despite DB/REDIS being wired.
@@ -11,7 +21,6 @@
   echo "APP_URL=${APP_URL:-http://localhost}"
   echo "APP_DEBUG=${APP_DEBUG:-false}"
   echo "APP_KEY=${APP_KEY:-base64:$(head -c 32 /dev/urandom | base64)}"
-  echo "APP_INSTALLED=false"
   echo "BEHIND_PROXY=${BEHIND_PROXY:-true}"
   echo "TRUSTED_PROXIES=${TRUSTED_PROXIES:-*}"
   echo "DB_CONNECTION=${DB_CONNECTION:-pgsql}"
@@ -29,12 +38,8 @@
   echo "QUEUE_CONNECTION=${QUEUE_CONNECTION:-redis}"
   echo "MAIL_DRIVER=${MAIL_DRIVER:-log}"
   echo "SKIP_CADDY=${SKIP_CADDY:-false}"
+  echo "APP_INSTALLED=false"
 } > /pelican-data/.env
-
-# Generate APP_KEY if it wasn't provided
-if [ -z "${APP_KEY}" ]; then
-  echo "Generated APP_KEY"
-fi
 
 # create directories for volumes
 mkdir -p /pelican-data/storage/logs /pelican-data/database /pelican-data/storage/app/public /var/run/supervisord /var/www/html/storage/logs/supervisord
