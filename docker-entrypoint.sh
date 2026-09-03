@@ -6,10 +6,11 @@
 mkdir -p /pelican-data /var/www/html/storage/logs
 
 # Railway injects PORT=8080 — Caddy must listen on it
-# The original entrypoint sets CADDY_APP_URL=:80 when BEHIND_PROXY=true
-# We need to override this to use Railway's PORT
+# The upstream entrypoint overrides CADDY_APP_URL only when BEHIND_PROXY=true
+# So we set BEHIND_PROXY=false to prevent the override, then set our own Caddy vars
 if [ -n "${PORT}" ]; then
   echo "Railway PORT=${PORT} — configuring Caddy to listen on ${PORT}"
+  export BEHIND_PROXY="false"
   export CADDY_APP_URL=":${PORT}"
   export CADDY_AUTO_HTTPS="auto_https off"
   export CADDY_LE_EMAIL=""
