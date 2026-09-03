@@ -2,6 +2,7 @@ FROM ghcr.io/pelican/panel:latest
 
 USER root
 
+# v2: sync Railway env vars into .env on volume
 COPY docker-entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
