@@ -15,6 +15,14 @@
     "pelican-data": {
       "mountPath": "/pelican-data",
       "size": 10
+    },
+    "pelican-db-data": {
+      "mountPath": "/var/lib/postgresql/data",
+      "size": 10
+    },
+    "pelican-redis-data": {
+      "mountPath": "/data",
+      "size": 5
     }
   }
 }

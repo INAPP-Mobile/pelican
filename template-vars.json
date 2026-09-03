@@ -1,0 +1,164 @@
+{
+  "pelican-db": {
+    "POSTGRES_USER": {
+      "name": "POSTGRES_USER",
+      "defaultValue": "pelican",
+      "description": "PostgreSQL superuser username. Referenced by pelican as ${{pelican-db.POSTGRES_USER}}.",
+      "isOptional": true
+    },
+    "POSTGRES_PASSWORD": {
+      "name": "POSTGRES_PASSWORD",
+      "defaultValue": "${{secret(32)}}",
+      "description": "PostgreSQL superuser password. Auto-generated at deploy time. Referenced by pelican as ${{pelican-db.POSTGRES_PASSWORD}}.",
+      "isOptional": true
+    },
+    "POSTGRES_DB": {
+      "name": "POSTGRES_DB",
+      "defaultValue": "pelican",
+      "description": "Default database name. Pelican uses this database for all its data.",
+      "isOptional": true
+    },
+    "POSTGRES_PORT": {
+      "name": "POSTGRES_PORT",
+      "defaultValue": "5432",
+      "description": "Port PostgreSQL listens on inside the container. Must stay 5432.",
+      "isOptional": true
+    },
+    "PGDATA": {
+      "name": "PGDATA",
+      "defaultValue": "/var/lib/postgresql/data/pgdata",
+      "description": "Data directory inside the volume. Points below the mount root to avoid the lost+found conflict.",
+      "isOptional": true
+    }
+  },
+  "pelican-redis": {
+    "REDIS_AUTH": {
+      "name": "REDIS_AUTH",
+      "defaultValue": "${{secret(32)}}",
+      "description": "Redis password (requirepass). Auto-generated at deploy time. Referenced by pelican as ${{pelican-redis.REDIS_AUTH}}.",
+      "isOptional": true
+    },
+    "REDIS_PORT": {
+      "name": "REDIS_PORT",
+      "defaultValue": "6379",
+      "description": "Redis server listening port. Referenced by pelican as ${{pelican-redis.REDIS_PORT}}.",
+      "isOptional": true
+    },
+    "REDIS_HOST": {
+      "name": "REDIS_HOST",
+      "defaultValue": "${{RAILWAY_PRIVATE_DOMAIN}}",
+      "description": "Redis internal hostname. Referenced by pelican as ${{pelican-redis.REDIS_HOST}}.",
+      "isOptional": true
+    }
+  },
+  "pelican": {
+    "APP_URL": {
+      "name": "APP_URL",
+      "defaultValue": "${{RAILWAY_PUBLIC_DOMAIN}}",
+      "description": "Public URL for the panel (Railway auto-generates this)",
+      "isOptional": true
+    },
+    "APP_ENV": {
+      "name": "APP_ENV",
+      "defaultValue": "production",
+      "description": "Application environment",
+      "isOptional": true
+    },
+    "APP_DEBUG": {
+      "name": "APP_DEBUG",
+      "defaultValue": "false",
+      "description": "Enable debug mode (do not enable in production)",
+      "isOptional": true
+    },
+    "BEHIND_PROXY": {
+      "name": "BEHIND_PROXY",
+      "defaultValue": "true",
+      "description": "Set true if behind a reverse proxy (Railway)",
+      "isOptional": true
+    },
+    "TRUSTED_PROXIES": {
+      "name": "TRUSTED_PROXIES",
+      "defaultValue": "*",
+      "description": "Comma-separated trusted proxy IPs (* for all)",
+      "isOptional": true
+    },
+    "DB_CONNECTION": {
+      "name": "DB_CONNECTION",
+      "defaultValue": "pgsql",
+      "description": "Database driver (sqlite, mysql, pgsql)",
+      "isOptional": true
+    },
+    "DB_HOST": {
+      "name": "DB_HOST",
+      "defaultValue": "${{pelican-db.RAILWAY_PRIVATE_DOMAIN}}",
+      "description": "PostgreSQL hostname. Auto-resolved to pelican-db service private domain.",
+      "isOptional": true
+    },
+    "DB_PORT": {
+      "name": "DB_PORT",
+      "defaultValue": "${{pelican-db.POSTGRES_PORT}}",
+      "description": "PostgreSQL port. Auto-resolved from pelican-db service.",
+      "isOptional": true
+    },
+    "DB_DATABASE": {
+      "name": "DB_DATABASE",
+      "defaultValue": "${{pelican-db.POSTGRES_DB}}",
+      "description": "Database name. Auto-resolved from pelican-db service.",
+      "isOptional": true
+    },
+    "DB_USERNAME": {
+      "name": "DB_USERNAME",
+      "defaultValue": "${{pelican-db.POSTGRES_USER}}",
+      "description": "Database username. Auto-resolved from pelican-db service.",
+      "isOptional": true
+    },
+    "DB_PASSWORD": {
+      "name": "DB_PASSWORD",
+      "defaultValue": "${{pelican-db.POSTGRES_PASSWORD}}",
+      "description": "Database password. Auto-resolved from pelican-db service.",
+      "isOptional": true
+    },
+    "CACHE_DRIVER": {
+      "name": "CACHE_DRIVER",
+      "defaultValue": "redis",
+      "description": "Cache driver (file, redis, memcached)",
+      "isOptional": true
+    },
+    "SESSION_DRIVER": {
+      "name": "SESSION_DRIVER",
+      "defaultValue": "redis",
+      "description": "Session driver (file, redis, cookie, database)",
+      "isOptional": true
+    },
+    "QUEUE_DRIVER": {
+      "name": "QUEUE_DRIVER",
+      "defaultValue": "redis",
+      "description": "Queue driver (database, redis, sync)",
+      "isOptional": true
+    },
+    "REDIS_HOST": {
+      "name": "REDIS_HOST",
+      "defaultValue": "${{pelican-redis.RAILWAY_PRIVATE_DOMAIN}}",
+      "description": "Redis hostname. Auto-resolved to pelican-redis service private domain.",
+      "isOptional": true
+    },
+    "REDIS_PORT": {
+      "name": "REDIS_PORT",
+      "defaultValue": "${{pelican-redis.REDIS_PORT}}",
+      "description": "Redis port. Auto-resolved from pelican-redis service.",
+      "isOptional": true
+    },
+    "MAIL_DRIVER": {
+      "name": "MAIL_DRIVER",
+      "defaultValue": "log",
+      "description": "Mail driver (log, smtp)",
+      "isOptional": true
+    },
+    "SKIP_CADDY": {
+      "name": "SKIP_CADDY",
+      "defaultValue": "false",
+      "description": "Skip Caddy web server (for PHP-FPM only setups)",
+      "isOptional": true
+    }
+  }
+}
