@@ -2,41 +2,38 @@
 # shellcheck shell=dash
 # Modified for Railway — listens on $PORT instead of :80
 
-# Ensure .env exists on volume
-if [ ! -f /pelican-data/.env ]; then
-  touch /pelican-data/.env
-fi
+# Force-rebuild .env from Railway-injected env vars on every boot.
+# Pelican's installer reads .env directly; stale values on volume cause
+# the installer to prompt for connection info despite DB/REDIS being wired.
+{
+  echo "APP_NAME=Pelican"
+  echo "APP_ENV=${APP_ENV:-production}"
+  echo "APP_URL=${APP_URL:-http://localhost}"
+  echo "APP_DEBUG=${APP_DEBUG:-false}"
+  echo "APP_KEY=${APP_KEY:-base64:$(head -c 32 /dev/urandom | base64)}"
+  echo "APP_INSTALLED=false"
+  echo "BEHIND_PROXY=${BEHIND_PROXY:-true}"
+  echo "TRUSTED_PROXIES=${TRUSTED_PROXIES:-*}"
+  echo "DB_CONNECTION=${DB_CONNECTION:-pgsql}"
+  echo "DB_HOST=${DB_HOST:-localhost}"
+  echo "DB_PORT=${DB_PORT:-5432}"
+  echo "DB_DATABASE=${DB_DATABASE:-pelican}"
+  echo "DB_USERNAME=${DB_USERNAME:-pelican}"
+  echo "DB_PASSWORD=${DB_PASSWORD:-}"
+  echo "REDIS_HOST=${REDIS_HOST:-localhost}"
+  echo "REDIS_PORT=${REDIS_PORT:-6379}"
+  echo "REDIS_USERNAME=${REDIS_USERNAME:-}"
+  echo "REDIS_PASSWORD=${REDIS_PASSWORD:-}"
+  echo "CACHE_DRIVER=${CACHE_DRIVER:-redis}"
+  echo "SESSION_DRIVER=${SESSION_DRIVER:-redis}"
+  echo "QUEUE_CONNECTION=${QUEUE_CONNECTION:-redis}"
+  echo "MAIL_DRIVER=${MAIL_DRIVER:-log}"
+  echo "SKIP_CADDY=${SKIP_CADDY:-false}"
+} > /pelican-data/.env
 
-# Sync Railway-injected env vars into .env file
-# (Installer reads .env directly; Railway injects at container level)
-ENV_SYNC_VARS="APP_KEY APP_INSTALLED APP_URL APP_ENV DB_CONNECTION DB_HOST DB_PORT DB_DATABASE DB_USERNAME DB_PASSWORD REDIS_HOST REDIS_PORT REDIS_USERNAME REDIS_PASSWORD CACHE_DRIVER SESSION_DRIVER QUEUE_DRIVER TRUSTED_PROXIES"
-
-for VAR in $ENV_SYNC_VARS; do
-  eval "VAL=\${${VAR}:-}"
-  if [ -n "$VAL" ]; then
-    if grep -q "^${VAR}=" /pelican-data/.env; then
-      sed -i "s|^${VAR}=.*|${VAR}=${VAL}|" /pelican-data/.env
-    else
-      echo "${VAR}=${VAL}" >> /pelican-data/.env
-    fi
-  fi
-done
-
-# Generate APP_KEY if missing (first run)
+# Generate APP_KEY if it wasn't provided
 if [ -z "${APP_KEY}" ]; then
-  echo "No key set, Generating key."
-  APP_KEY="base64:$(head -c 32 /dev/urandom | base64)"
-  if grep -q "^APP_KEY=" /pelican-data/.env; then
-    sed -i "s|^APP_KEY=.*|APP_KEY=$APP_KEY|" /pelican-data/.env
-  else
-    echo "APP_KEY=$APP_KEY" >> /pelican-data/.env
-  fi
-  echo "Generated app key written to .env file"
-fi
-
-# Ensure APP_INSTALLED is in .env
-if ! grep -q "^APP_INSTALLED=" /pelican-data/.env; then
-  echo "APP_INSTALLED=false" >> /pelican-data/.env
+  echo "Generated APP_KEY"
 fi
 
 # create directories for volumes
