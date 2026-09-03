@@ -78,13 +78,22 @@ php artisan view:cache
 
 # --- Railway PORT handling ---
 # Railway injects PORT=8080. Listen on PORT instead of :80.
+# Override any previous CADDY_APP_URL setting (upstream sets :80 when BEHIND_PROXY=true)
+echo "=== Railway PORT handling ==="
+echo "PORT=${PORT:-8080}"
+echo "BEHIND_PROXY=${BEHIND_PROXY:-not set}"
+echo "Overriding CADDY_APP_URL to use Railway PORT"
+
 export SUPERVISORD_CADDY=true
 export CADDY_APP_URL=":${PORT:-8080}"
 export CADDY_AUTO_HTTPS="auto_https off"
 export CADDY_LE_EMAIL=""
+export CADDY_TRUSTED_PROXIES=""
+export CADDY_STRICT_PROXIES=""
 export ASSET_URL="${APP_URL}"
 
-echo "Railway PORT=${PORT:-8080} — Caddy listening on :${PORT:-8080}"
+echo "Final CADDY_APP_URL=${CADDY_APP_URL}"
+echo "Final SUPERVISORD_CADDY=${SUPERVISORD_CADDY}"
 echo "Starting PHP-FPM and Caddy"
 echo "Starting Supervisord"
 
