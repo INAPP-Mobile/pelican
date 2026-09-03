@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e293b"/>
+      <stop offset="100%" style="stop-color:#0f172a"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#38bdf8"/>
+      <stop offset="100%" style="stop-color:#0ea5e9"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="48" fill="url(#bg)"/>
+  <!-- Pelican beak shape -->
+  <path d="M60 120 Q80 80 140 90 Q180 95 190 130 Q195 155 170 175 Q130 200 90 185 Q55 170 50 145 Q48 130 60 120 Z" fill="none" stroke="url(#accent)" stroke-width="6" stroke-linejoin="round"/>
+  <!-- Body -->
+  <ellipse cx="120" cy="140" rx="50" ry="40" fill="none" stroke="#38bdf8" stroke-width="4" opacity="0.7"/>
+  <!-- Eye -->
+  <circle cx="155" cy="115" r="8" fill="#38bdf8"/>
+  <circle cx="155" cy="115" r="3" fill="#0f172a"/>
+  <!-- Wing -->
+  <path d="M85 130 Q70 145 80 165" fill="none" stroke="#38bdf8" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+  <!-- Server rack lines -->
+  <line x1="40" y1="210" x2="216" y2="210" stroke="#38bdf8" stroke-width="2" opacity="0.3"/>
+  <line x1="40" y1="220" x2="216" y2="220" stroke="#38bdf8" stroke-width="2" opacity="0.2"/>
+</svg>
