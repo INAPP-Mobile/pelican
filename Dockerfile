@@ -10,4 +10,4 @@ EXPOSE 8080
 ENV PORT=8080
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-CMD ["/bin/ash", "/entrypoint.sh", "supervisord", "-n", "-c", "/etc/supervisord.conf"]
+CMD ["supervisord", "-n", "-c", "/etc/supervisord.conf"]

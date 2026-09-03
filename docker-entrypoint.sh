@@ -16,4 +16,4 @@ if [ -n "${PORT}" ]; then
 fi
 
 # Run original entrypoint (preserves .env loading, APP_KEY generation, etc.)
-exec /docker/entrypoint.sh "$@"
+exec /entrypoint.sh "$@"
