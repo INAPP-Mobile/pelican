@@ -9,8 +9,5 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 EXPOSE 8080
 ENV PORT=8080
 
-# Volume for panel data (configs, plugins, logs)
-VOLUME ["/pelican-data"]
-
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["/bin/ash", "/entrypoint.sh", "supervisord", "-n", "-c", "/etc/supervisord.conf"]
