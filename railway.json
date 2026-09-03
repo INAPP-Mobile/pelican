@@ -5,7 +5,6 @@
     "dockerfilePath": "Dockerfile"
   },
   "deploy": {
-    "startCommand": "/usr/local/bin/docker-entrypoint.sh /bin/ash /entrypoint.sh supervisord -n -c /etc/supervisord.conf",
     "healthcheckPath": "/",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
