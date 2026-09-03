@@ -2,43 +2,40 @@
 # shellcheck shell=dash
 # Modified for Railway — listens on $PORT instead of :80
 
-# check for .env file or symlink and generate app keys if missing
-if [ -f /pelican-data/.env ]; then
-  echo ".env vars exist."
-  for VAR in APP_KEY APP_INSTALLED DB_CONNECTION DB_HOST DB_PORT TRUSTED_PROXIES; do
-    echo "checking for ${VAR}"
-    eval "CURRENT=\${${VAR}:-}"
-    if [ -n "${CURRENT}" ]; then
-      echo "${VAR} already set in environment, skipping"
-      continue
-    fi
-    if ! LINE=$(grep -m1 "^${VAR}=" .env); then
-      echo "didn't find variable to set"
-      continue
-    fi
-    case "$LINE" in
-      *'$('*|*'`'*)
-        echo "var in .env may be executable, skipping"
-        continue
-        ;;
-    esac
-    echo "loading ${VAR} from .env"
-    export "$(echo "$LINE" | tr -d "\r\"'")"
-  done
-else
-  echo ".env vars don't exist."
+# Ensure .env exists on volume
+if [ ! -f /pelican-data/.env ]; then
   touch /pelican-data/.env
+fi
 
-  if [ -z "${APP_KEY}" ]; then
-    echo "No key set, Generating key."
-    APP_KEY="base64:$(head -c 32 /dev/urandom | base64)"
-    echo "APP_KEY=$APP_KEY" > /pelican-data/.env
-    echo "Generated app key written to .env file"
-  else
-    echo "APP_KEY exists in environment, using that."
-    echo "APP_KEY=${APP_KEY}" > /pelican-data/.env
+# Sync Railway-injected env vars into .env file
+# (Installer reads .env directly; Railway injects at container level)
+ENV_SYNC_VARS="APP_KEY APP_INSTALLED APP_URL APP_ENV DB_CONNECTION DB_HOST DB_PORT DB_DATABASE DB_USERNAME DB_PASSWORD REDIS_HOST REDIS_PORT REDIS_USERNAME REDIS_PASSWORD CACHE_DRIVER SESSION_DRIVER QUEUE_DRIVER TRUSTED_PROXIES"
+
+for VAR in $ENV_SYNC_VARS; do
+  eval "VAL=\${${VAR}:-}"
+  if [ -n "$VAL" ]; then
+    if grep -q "^${VAR}=" /pelican-data/.env; then
+      sed -i "s|^${VAR}=.*|${VAR}=${VAL}|" /pelican-data/.env
+    else
+      echo "${VAR}=${VAL}" >> /pelican-data/.env
+    fi
   fi
+done
 
+# Generate APP_KEY if missing (first run)
+if [ -z "${APP_KEY}" ]; then
+  echo "No key set, Generating key."
+  APP_KEY="base64:$(head -c 32 /dev/urandom | base64)"
+  if grep -q "^APP_KEY=" /pelican-data/.env; then
+    sed -i "s|^APP_KEY=.*|APP_KEY=$APP_KEY|" /pelican-data/.env
+  else
+    echo "APP_KEY=$APP_KEY" >> /pelican-data/.env
+  fi
+  echo "Generated app key written to .env file"
+fi
+
+# Ensure APP_INSTALLED is in .env
+if ! grep -q "^APP_INSTALLED=" /pelican-data/.env; then
   echo "APP_INSTALLED=false" >> /pelican-data/.env
 fi
 
@@ -55,46 +52,26 @@ if [ "${APP_INSTALLED}" != "true" ]; then
     until nc -z -v -w30 "${DB_HOST}" "${DB_PORT}"
     do
       echo "Waiting for database connection..."
-      sleep 1
+      sleep 2
     done
-  else
-    echo "using sqlite database"
+    echo "Database is reachable."
   fi
-  
-  if [ "${SKIP_MIGRATIONS:-false}" = "true" ]; then
-    echo "Skipping migrations (SKIP_MIGRATIONS=true)"
-  else
-    php artisan migrate --force
-  fi
+  echo "Running migrations..."
+  cd /var/www/html
+  php artisan migrate --force --seed
 
-  php artisan p:plugin:composer
+  echo "Creating initial user..."
+  php artisan p:user:make --admin --no-interaction || true
+
+  echo "APP_INSTALLED=true" >> /pelican-data/.env
 fi
 
-echo "Optimizing Filament"
-php artisan filament:optimize
+# Patch Caddy app URL to Railway PORT if not already set
+if [ -n "${PORT}" ]; then
+  grep -q "^CADDY_APP_URL=" /pelican-data/.env && \
+    sed -i "s|^CADDY_APP_URL=.*|CADDY_APP_URL=\"\${PORT}\"|" /pelican-data/.env || \
+    echo "CADDY_APP_URL=\"\${PORT}\"" >> /pelican-data/.env
+fi
 
-echo "Caching Blade views"
-php artisan view:cache
-
-# --- Railway PORT handling ---
-# Railway injects PORT=8080. Listen on PORT instead of :80.
-# Override any previous CADDY_APP_URL setting (upstream sets :80 when BEHIND_PROXY=true)
-echo "=== Railway PORT handling ==="
-echo "PORT=${PORT:-8080}"
-echo "BEHIND_PROXY=${BEHIND_PROXY:-not set}"
-echo "Overriding CADDY_APP_URL to use Railway PORT"
-
-export SUPERVISORD_CADDY=true
-export CADDY_APP_URL=":${PORT:-8080}"
-export CADDY_AUTO_HTTPS="auto_https off"
-export CADDY_LE_EMAIL=""
-export CADDY_TRUSTED_PROXIES=""
-export CADDY_STRICT_PROXIES=""
-export ASSET_URL="${APP_URL}"
-
-echo "Final CADDY_APP_URL=${CADDY_APP_URL}"
-echo "Final SUPERVISORD_CADDY=${SUPERVISORD_CADDY}"
-echo "Starting PHP-FPM and Caddy"
-echo "Starting Supervisord"
-
-exec supervisord -n -c /etc/supervisord.conf
+# Start supervisord
+exec supervisord -c /etc/supervisord.conf
