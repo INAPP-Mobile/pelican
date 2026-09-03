@@ -5,10 +5,9 @@ USER root
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Patch Caddyfile to listen on Railway's injected PORT
-# The upstream entrypoint hardcodes CADDY_APP_URL=:80 when BEHIND_PROXY=true
-# Railway forwards PORT=8080 to the container, so Caddy must listen on PORT
-RUN sed -i 's/{CADDY_APP_URL}/{$PORT}/g' /etc/caddy/Caddyfile
+# Patch the upstream entrypoint to listen on Railway's PORT instead of :80
+# The upstream sets CADDY_APP_URL=:80 when BEHIND_PROXY=true — override with $PORT
+RUN sed -i 's|export CADDY_APP_URL=":80"|export CADDY_APP_URL=":${PORT}"|g' /entrypoint.sh
 
 EXPOSE 8080
 ENV PORT=8080
