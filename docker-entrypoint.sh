@@ -43,7 +43,7 @@ else
 fi
 
 # create directories for volumes
-mkdir -p /pelican-data/storage/logs /pelican-data/database /pelican-data/storage/app/public /var/run/supervisord
+mkdir -p /pelican-data/storage/logs /pelican-data/database /pelican-data/storage/app/public /var/run/supervisord /var/www/html/storage/logs/supervisord
 
 # Fix ownership — Railway volume is root-mounted, panel runs as www-data
 chown -R www-data:www-data /pelican-data /var/www/html/storage 2>/dev/null || true
