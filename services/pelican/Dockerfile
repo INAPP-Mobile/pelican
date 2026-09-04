@@ -6,6 +6,7 @@ USER root
 ARG CACHE_BUST=20260904t0310
 
 COPY docker-entrypoint.sh /entrypoint.sh
+COPY create-admin.php /create-admin.php
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 
