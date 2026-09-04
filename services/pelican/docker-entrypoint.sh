@@ -43,7 +43,6 @@ done
   echo "SESSION_DRIVER=${SESSION_DRIVER:-redis}"
   echo "QUEUE_CONNECTION=${QUEUE_CONNECTION:-redis}"
   echo "MAIL_DRIVER=${MAIL_DRIVER:-log}"
-  echo "APP_INSTALLED=false"
 } > /pelican-data/.env
 
 # Write a Railway-compatible Caddyfile
