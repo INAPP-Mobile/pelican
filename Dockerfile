@@ -2,8 +2,9 @@ FROM ghcr.io/pelican/panel:latest
 
 USER root
 
-# Railway env-sync entrypoint - forces fresh .env from injected vars
-# Timestamp: 2026-09-03T23:50:00Z
+# Force cache invalidation: change this value to bust the build cache
+ARG CACHE_BUST=20260903t2352
+
 COPY docker-entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
