@@ -1,7 +1,6 @@
 #!/bin/ash -e
 # shellcheck shell=dash
 # Railway-compatible entrypoint for Pelican Panel
-# Writes .env from Railway-injected vars, configures Caddy, runs upstream logic
 
 # Wait for volume mount to accept writes
 for i in $(seq 1 60); do
@@ -42,12 +41,22 @@ done
   echo "APP_INSTALLED=false"
 } > /pelican-data/.env
 
-# Configure Caddy for Railway (listen on Railway's PORT, bind to all interfaces)
-export CADDY_APP_URL=":${PORT:-8080}"
-export CADDY_AUTO_HTTPS="off"
-export CADDY_LE_EMAIL=""
-export CADDY_TRUSTED_PROXIES=""
-export CADDY_STRICT_PROXIES=""
+# Write a Railway-compatible Caddyfile
+cat > /etc/caddy/Caddyfile <<CADDYFILE
+{
+    admin off
+}
+
+:${PORT:-8080} {
+    root * /var/www/html/public
+    encode gzip
+
+    file_server
+    php_fastcgi 127.0.0.1:9000
+}
+CADDYFILE
+
+# Set supervisor to run caddy
 export SUPERVISORD_CADDY=true
 
 # Create required directories
