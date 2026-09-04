@@ -1,0 +1,32 @@
+{
+  "POSTGRES_USER": {
+    "name": "POSTGRES_USER",
+    "defaultValue": "pelican",
+    "description": "PostgreSQL superuser username. Referenced by pelican as ${{pelican-db.POSTGRES_USER}}.",
+    "isOptional": true
+  },
+  "POSTGRES_PASSWORD": {
+    "name": "POSTGRES_PASSWORD",
+    "defaultValue": "${{secret(32)}}",
+    "description": "PostgreSQL superuser password. Auto-generated at deploy time. Referenced by pelican as ${{pelican-db.POSTGRES_PASSWORD}}.",
+    "isOptional": true
+  },
+  "POSTGRES_DB": {
+    "name": "POSTGRES_DB",
+    "defaultValue": "pelican",
+    "description": "Default database name. Pelican uses this database for all its data.",
+    "isOptional": true
+  },
+  "POSTGRES_PORT": {
+    "name": "POSTGRES_PORT",
+    "defaultValue": "5432",
+    "description": "Port PostgreSQL listens on inside the container. Must stay 5432.",
+    "isOptional": true
+  },
+  "PGDATA": {
+    "name": "PGDATA",
+    "defaultValue": "/var/lib/postgresql/data/pgdata",
+    "description": "Data directory inside the volume. Points below the mount root to avoid the lost+found conflict.",
+    "isOptional": true
+  }
+}

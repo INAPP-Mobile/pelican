@@ -1,0 +1,20 @@
+{
+  "REDIS_AUTH": {
+    "name": "REDIS_AUTH",
+    "defaultValue": "${{secret(32)}}",
+    "description": "Redis password (requirepass). Auto-generated at deploy time. Referenced by pelican as ${{pelican-redis.REDIS_AUTH}}.",
+    "isOptional": true
+  },
+  "REDIS_PORT": {
+    "name": "REDIS_PORT",
+    "defaultValue": "6379",
+    "description": "Redis server listening port. Referenced by pelican as ${{pelican-redis.REDIS_PORT}}.",
+    "isOptional": true
+  },
+  "REDIS_HOST": {
+    "name": "REDIS_HOST",
+    "defaultValue": "${{RAILWAY_PRIVATE_DOMAIN}}",
+    "description": "Redis internal hostname. Referenced by pelican as ${{pelican-redis.REDIS_HOST}}.",
+    "isOptional": true
+  }
+}

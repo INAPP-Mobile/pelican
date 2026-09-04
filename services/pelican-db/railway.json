@@ -1,0 +1,19 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "builder": "dockerfile",
+    "dockerfilePath": "Dockerfile"
+  },
+  "deploy": {
+    "numReplicas": 1,
+    "restartPolicyType": "on_failure",
+    "restartPolicyMaxRetries": 10,
+    "volumeMounts": [
+      {
+        "name": "pelican-db-data",
+        "mountPath": "/var/lib/postgresql/data"
+      }
+    ],
+    "healthcheckTimeout": 300
+  }
+}

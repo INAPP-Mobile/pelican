@@ -80,6 +80,20 @@ if [ "${APP_INSTALLED}" != "true" ]; then
   echo "Running migrations..."
   php artisan migrate --force --seed
   echo "APP_INSTALLED=true" >> /pelican-data/.env
+
+  # Auto-create admin user if one doesn't exist
+  echo "Checking for admin user..."
+  if ! php artisan tinker --execute="echo \App\Models\User::where('admin', true)->exists() ? 'exists' : 'missing';" 2>/dev/null | grep -q "exists"; then
+    echo "Creating default admin user..."
+    php artisan p:user:make \
+      --email="${ADMIN_EMAIL:-admin@example.com}" \
+      --username="${ADMIN_USERNAME:-admin}" \
+      --password="${ADMIN_PASSWORD:-password}" \
+      --admin=true
+    echo "Admin user created: ${ADMIN_USERNAME:-admin} / ${ADMIN_PASSWORD:-password}"
+  else
+    echo "Admin user already exists, skipping."
+  fi
 fi
 
 # Optimize Laravel

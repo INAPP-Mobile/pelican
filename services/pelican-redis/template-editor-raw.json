@@ -1,0 +1,10 @@
+{
+  "REDIS_PORT": {
+    "value": "6379",
+    "description": "Redis server listening port. Referenced by pelican as ${{pelican-redis.REDIS_PORT}}."
+  },
+  "REDIS_HOST": {
+    "value": "${{RAILWAY_PRIVATE_DOMAIN}}",
+    "description": "Redis internal hostname. Referenced by pelican as ${{pelican-redis.REDIS_HOST}}."
+  }
+}

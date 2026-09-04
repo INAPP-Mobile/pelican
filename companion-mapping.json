@@ -1,0 +1,17 @@
+{
+  "pelican-db": {
+    "PRIVATE_DOMAIN": "pelican-db.RAILWAY_PRIVATE_DOMAIN",
+    "POSTGRES_USER": "POSTGRES_USER",
+    "POSTGRES_PASSWORD": "POSTGRES_PASSWORD",
+    "POSTGRES_DB": "POSTGRES_DB",
+    "POSTGRES_PORT": "POSTGRES_PORT"
+  },
+  "pelican-redis": {
+    "PRIVATE_DOMAIN": "pelican-redis.RAILWAY_PRIVATE_DOMAIN",
+    "REDIS_PORT": "REDIS_PORT",
+    "REDIS_HOST": "REDIS_HOST"
+  },
+  "pelican": {
+    "PUBLIC_DOMAIN": "pelican.RAILWAY_PUBLIC_DOMAIN"
+  }
+}
