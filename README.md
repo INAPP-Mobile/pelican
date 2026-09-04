@@ -4,39 +4,46 @@
 
 Pelican Panel — open-source game server management panel with a clean UI, egg-based server templates, and multi-server support. Self-host your game servers with automated deployment, monitoring, and user management.
 
+## Source Repository
+
+[https://github.com/INAPP-Mobile/pelican](https://github.com/INAPP-Mobile/pelican)
+
 ## System Requirements
 
 - **Disk:** 10GB+ for panel data (configs, plugins, logs)
 - **Memory:** 512 MB RAM minimum (1 GB+ recommended)
 - **Network:** HTTP/HTTPS access for panel UI
-- **Database:** SQLite (default) or external MySQL/PostgreSQL
 
 ## About Hosting
 
-This template runs Pelican Panel on Railway with Caddy as the built-in web server. Panel data persists on a Railway volume mounted at `/pelican-data` — configs, plugins, and logs survive deploys and restarts.
+This template deploys three services: **pelican** (the panel), **pelican-db** (PostgreSQL 16), and **pelican-redis** (Redis 7). Database and Redis variables are pre-wired with companion references — no manual configuration needed.
 
-The entrypoint configures Caddy to listen on Railway's injected `PORT` (8080) and disables auto-https since Railway handles SSL termination at the proxy layer.
+Panel data persists on a Railway volume mounted at `/pelican-data` — configs, plugins, and logs survive deploys and restarts.
 
-**First-run setup:**
-1. After deploy, open the panel URL
-2. Complete the installation wizard (database, admin account, site settings)
-3. Add game servers (nodes) and eggs to start hosting
+**First-run setup: none.** The entrypoint runs migrations and seeds automatically on boot, then creates an admin account:
 
-Key environment variables:
+- **Username:** `admin`
+- **Password:** `password`
+
+Log in and change the admin credentials from the settings page immediately after your first deploy.
+
+The panel serves traffic through Caddy listening on Railway's injected `PORT`; Railway handles SSL termination at the proxy layer.
+
+Key environment variables (pre-configured):
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `APP_URL` | `http://localhost` | Public URL for the panel |
-| `LE_EMAIL` | *(empty)* | Let's Encrypt email (required for HTTPS) |
+| `APP_URL` | `${{RAILWAY_PUBLIC_DOMAIN}}` | Public URL for the panel |
 | `APP_ENV` | `production` | Application environment |
 | `APP_DEBUG` | `false` | Debug mode |
-| `DB_CONNECTION` | `sqlite` | Database driver (sqlite/mysql/pgsql) |
-| `CACHE_DRIVER` | `file` | Cache driver (file/redis/memcached) |
-| `SESSION_DRIVER` | `file` | Session driver (file/redis/cookie/database) |
-| `QUEUE_DRIVER` | `database` | Queue driver (database/redis/sync) |
+| `DB_CONNECTION` | `pgsql` | Database driver |
+| `DB_HOST` | `${{pelican-db.RAILWAY_PRIVATE_DOMAIN}}` | Postgres companion host |
+| `CACHE_DRIVER` | `redis` | Cache driver |
+| `SESSION_DRIVER` | `redis` | Session driver |
+| `QUEUE_DRIVER` | `redis` | Queue driver |
 | `MAIL_DRIVER` | `log` | Mail driver (log/smtp) |
-| `TRUSTED_PROXIES` | *(empty)* | Comma-separated trusted proxy IPs |
-| `BEHIND_PROXY` | `false` | Set true if behind Cloudflare/reverse proxy |
+| `TRUSTED_PROXIES` | `*` | Trusted proxy IPs |
+| `BEHIND_PROXY` | `true` | Behind Railway's reverse proxy |
 
 ## Ports
 
@@ -47,8 +54,9 @@ Key environment variables:
 ## Why Deploy
 
 - **One-click deploy**: no manual server setup or Docker knowledge required
+- **Zero-config install**: migrations, seeds, and admin account run automatically
 - **Persistent data**: configs, plugins, and logs survive restarts
-- **Built-in web server**: Caddy auto-configures with Railway's proxy
+- **Companion database + cache**: Postgres and Redis included, pre-wired
 - **Open source**: free, community-driven alternative to commercial panels
 
 ## Common Use Cases
@@ -58,11 +66,12 @@ Key environment variables:
 - Provide game server hosting as a service
 - Self-host a Pterodactyl alternative
 
-## Dependencies for
+## Dependencies for Pelican
 
-This template has no external service dependencies — everything runs in a single container with a persistent volume. SQLite is used by default; for production with high traffic, consider an external MySQL/PostgreSQL database.
+This template includes two companion services that deploy alongside the panel.
 
 ### Deployment Dependencies
 
+- **pelican-db** — PostgreSQL 16 database for panel data
+- **pelican-redis** — Redis 7 for cache, sessions, and queues
 - A Railway account
-- A domain (optional — Railway provides a default domain)
