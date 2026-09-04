@@ -94,4 +94,4 @@ cd /var/www/html
 php artisan optimize 2>/dev/null || true
 
 echo "Starting supervisord..."
-exec supervisord -c /etc/supervisor/supervisord.conf
+exec supervisord -c /etc/supervisord.conf

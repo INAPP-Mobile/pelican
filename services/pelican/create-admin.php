@@ -8,23 +8,26 @@ $email = getenv('ADMIN_EMAIL') ?: 'admin@example.com';
 $username = getenv('ADMIN_USERNAME') ?: 'admin';
 $password = getenv('ADMIN_PASSWORD') ?: 'password';
 
-// Check if admin already exists
-$user = \App\Models\User::where('root_admin', 1)->first();
+$service = app(\App\Services\Users\UserCreationService::class);
+
+// Look up by email OR username (root_admin column no longer exists in modern Pelican)
+$user = \App\Models\User::where('email', $email)->orWhere('username', $username)->first();
+
 if ($user) {
-    echo "Admin already exists, updating password...\n";
-    $user->password = password_hash($password, PASSWORD_BCRYPT);
+    echo "Admin already exists ({$user->username}), updating password...\n";
+    $user->password = $password;
     $user->save();
-    echo "Admin password updated\n";
+    // Ensure root admin role
+    $user->syncRoles(\App\Models\Role::getRootAdmin());
+    echo "Root Admin role ensured, password updated\n";
 } else {
-    // Use UserCreationService to create admin with root_admin role
-    $service = app(\App\Services\Users\UserCreationService::class);
     $user = $service->handle([
         'email' => $email,
         'username' => $username,
         'password' => $password,
         'root_admin' => true,
     ]);
-    echo "Admin user created\n";
+    echo "Admin user created via UserCreationService\n";
 }
 
 echo "Credentials: $username / $password\n";
