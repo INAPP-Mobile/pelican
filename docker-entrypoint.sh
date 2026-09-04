@@ -19,7 +19,12 @@ done
 {
   echo "APP_NAME=Pelican"
   echo "APP_ENV=${APP_ENV:-production}"
-  echo "APP_URL=${APP_URL:-http://localhost}"
+  # Ensure APP_URL has a scheme (Laravel doubles domain in redirects otherwise)
+  case "$APP_URL" in
+    http://*|https://*) : ;;
+    *) APP_URL="https://$APP_URL" ;;
+  esac
+  echo "APP_URL=${APP_URL}"
   echo "APP_DEBUG=${APP_DEBUG:-false}"
   echo "APP_KEY=${APP_KEY:-base64:$(head -c 32 /dev/urandom | base64)}"
   echo "BEHIND_PROXY=${BEHIND_PROXY:-true}"
