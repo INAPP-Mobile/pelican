@@ -69,6 +69,7 @@ mkdir -p /pelican-data/storage/logs /pelican-data/database /pelican-data/storage
 chown -R www-data:www-data /pelican-data /var/www/html/storage 2>/dev/null || true
 
 # Run migrations if not installed
+export APP_INSTALLED=false
 if [ "${APP_INSTALLED}" != "true" ]; then
   if [ "${DB_CONNECTION}" != "sqlite" ]; then
     echo "Waiting for database ${DB_HOST}:${DB_PORT}..."
