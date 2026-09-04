@@ -82,19 +82,26 @@ if [ "${APP_INSTALLED}" != "true" ]; then
   php artisan migrate --force --seed
   echo "APP_INSTALLED=true" >> /pelican-data/.env
 
-  # Auto-create admin user if one doesn't exist
+  # Auto-create admin user
   echo "Checking for admin user..."
-  if ! php artisan tinker --execute="echo \App\Models\User::where('admin', true)->exists() ? 'exists' : 'missing';" 2>/dev/null | grep -q "exists"; then
+  ADMIN_EXISTS=$(php artisan tinker --execute="echo \\App\\Models\\User::where('admin', true)->exists() ? 'yes' : 'no';" 2>&1)
+  echo "Admin check result: ${ADMIN_EXISTS}"
+  if echo "${ADMIN_EXISTS}" | grep -q "yes"; then
+    echo "Admin user already exists, updating password..."
+    php artisan p:user:make \
+      --email="${ADMIN_EMAIL:-admin@example.com}" \
+      --username="${ADMIN_USERNAME:-admin}" \
+      --password="${ADMIN_PASSWORD:-password}" \
+      --admin=true 2>&1 || echo "p:user:make failed, trying tinker..."
+  else
     echo "Creating default admin user..."
     php artisan p:user:make \
       --email="${ADMIN_EMAIL:-admin@example.com}" \
       --username="${ADMIN_USERNAME:-admin}" \
       --password="${ADMIN_PASSWORD:-password}" \
-      --admin=true
-    echo "Admin user created: ${ADMIN_USERNAME:-admin} / ${ADMIN_PASSWORD:-password}"
-  else
-    echo "Admin user already exists, skipping."
+      --admin=true 2>&1 || echo "p:user:make failed, trying tinker..."
   fi
+  echo "Admin credentials: ${ADMIN_USERNAME:-admin} / ${ADMIN_PASSWORD:-password}"
 fi
 
 # Optimize Laravel
