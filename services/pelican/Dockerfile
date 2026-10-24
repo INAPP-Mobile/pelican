@@ -1,4 +1,4 @@
-FROM ghcr.io/pelican/panel:latest
+FROM ghcr.io/pelican/panel:v1.0.0-rc.2
 
 USER root
 

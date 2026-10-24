@@ -8,7 +8,7 @@
     "numReplicas": 1,
     "restartPolicyType": "on_failure",
     "restartPolicyMaxRetries": 10,
-    "healthcheckPath": "/",
+    "healthcheckPath": "/up",
     "healthcheckTimeout": 300,
     "volumeMounts": [
       {
